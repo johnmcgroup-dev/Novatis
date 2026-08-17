@@ -1,10 +1,9 @@
 import type { PoolClient } from 'pg';
 
-export async function getAccountBalance(client: PoolClient, accountId: string, forUpdate = false): Promise<bigint> {
-  const lock = forUpdate ? ' FOR UPDATE' : '';
+export async function getAccountBalance(client: PoolClient, accountId: string, _forUpdate = false): Promise<bigint> {
   const result = await client.query<{ balance: string }>(
     `SELECT COALESCE(SUM(CASE WHEN direction = 'CREDIT' THEN amount_minor ELSE -amount_minor END), 0)::text AS balance
-       FROM postings WHERE ledger_account_id = $1${lock}`,
+       FROM postings WHERE ledger_account_id = $1`,
     [accountId],
   );
   return BigInt(result.rows[0]?.balance ?? '0');
